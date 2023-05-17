@@ -4,7 +4,7 @@
 Plugin Name: Countdown Timer
 Plugin URI:  
 Description: Countdown Timer
-Version:     1.0.0
+Version:     1.0.1
 Author:      Grzegorz Kowalski
 Author URI:  https://grzegorzkowalski.pl
 */
@@ -13,6 +13,8 @@ add_shortcode( 'countdown_timer', 'countdown_timer_shortcode' );
 
 function countdown_timer_shortcode( $atts ) {
     $atts = shortcode_atts( array(
+        'id' => 'countdown_timer',
+        'tag' => 'div',
         'date' => date('Y-12-31 23:59:59'),
         'url' => '',
         'separator' => ':',
@@ -22,8 +24,8 @@ function countdown_timer_shortcode( $atts ) {
 
     ob_start(); ?>
 
-    <div id="countdown_timer_container">
-        <div id="countdown_timer">
+    <div id="<?= $atts['id'] ?>_container" class="countdown_timer_container">
+        <div id="<?= $atts['id'] ?>" class="countdown_timer">
             <div class="box days">
                 <div class="counter">00</div>
                 <div class="label">dni</div>
@@ -60,7 +62,9 @@ function countdown_timer_shortcode( $atts ) {
             let diff = countdown_timer_event_date - now;
             if(diff < 0){
                 // redirect browser to url
-                window.location.href = "<?php echo $atts['url']; ?>";
+                if ("<?php echo $atts['url']; ?>" != "") {
+                    window.location.href = "<?php echo $atts['url']; ?>";
+                }
             }
 
             let days = Math.floor(diff / (1000*60*60*24));
@@ -75,10 +79,12 @@ function countdown_timer_shortcode( $atts ) {
             minutes <= 9 ? minutes = `0${minutes}` : minutes;
             seconds <= 9 ? seconds = `0${seconds}` : seconds;   
 
-            document.querySelector('#countdown_timer_container .days .counter').textContent = days;
-            document.querySelector('#countdown_timer_container .hours .counter').textContent = hours;
-            document.querySelector('#countdown_timer_container .minutes .counter').textContent = minutes;
-            document.querySelector('#countdown_timer_container .seconds .counter').textContent = seconds;
+            const countdown_timer_container_selector = '#<?= $atts['id'] ?>_container';
+
+            document.querySelector(countdown_timer_container_selector + ' .days .counter').textContent = days;
+            document.querySelector(countdown_timer_container_selector + ' .hours .counter').textContent = hours;
+            document.querySelector(countdown_timer_container_selector + ' .minutes .counter').textContent = minutes;
+            document.querySelector(countdown_timer_container_selector + ' .seconds .counter').textContent = seconds;
 
         }
         countdown_timer_callback();
@@ -87,6 +93,11 @@ function countdown_timer_shortcode( $atts ) {
 
     <?php
     $html = ob_get_clean();
+
+    // if tag is not div, replace all "div" with tag
+    if($atts['tag'] != 'div'){
+        $html = str_replace('div', $atts['tag'], $html);
+    }
 
     return $html;
 }
