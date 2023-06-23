@@ -68,17 +68,17 @@ function countdown_timer_shortcode( $atts ) {
                 if (window.countdown_timer_interval_id) {
                     clearInterval(window.countdown_timer_interval_id);
                 }
-                console.log('Would be redirected to');
+                console.log('Would be redirected to: <?php echo $atts['url']; ?>');
 
-                <?php if(is_admin_bar_showing() === false): ?>
+                <?php if(is_admin_bar_showing() === false && is_customize_preview() == false): ?>
                 if ("<?php echo $atts['url']; ?>" == '') {
                     window.location.reload();
                 } else {
                     window.location.href = "<?php echo $atts['url']; ?>";
                 }
                 <?php else: ?>
-                    console.log('Countdown Plugin: admin bar is showing, redirecting is disabled');
-                    alert('Countdown Plugin: admin bar is showing, redirecting is disabled');
+                    console.log('Countdown Plugin: redirecting is disabled for logged in admins');
+                    alert('Countdown Plugin: redirecting is disabled  for logged in admins');
                 <?php endif; ?>
             }
 
