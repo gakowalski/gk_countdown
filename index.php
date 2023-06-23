@@ -4,7 +4,7 @@
 Plugin Name: Countdown Timer
 Plugin URI:  
 Description: Countdown Timer
-Version:     1.0.1
+Version:     1.0.2
 Author:      Grzegorz Kowalski
 Author URI:  https://grzegorzkowalski.pl
 */
@@ -21,6 +21,7 @@ function countdown_timer_shortcode( $atts ) {
     ), $atts, 'countdown_timer' );
 
     $date = $atts['date'];
+
 
     ob_start(); ?>
 
@@ -56,21 +57,40 @@ function countdown_timer_shortcode( $atts ) {
 
     <script>
         const countdown_timer_event_date = new Date("<?php echo $date; ?>").getTime();
+        window.countdown_timer_interval_id = null;
 
         const countdown_timer_callback = () =>{
             const now = new Date().getTime();
+
             let diff = countdown_timer_event_date - now;
+
             if(diff < 0){
-                // redirect browser to url
-                if ("<?php echo $atts['url']; ?>" != "") {
+                if (window.countdown_timer_interval_id) {
+                    clearInterval(window.countdown_timer_interval_id);
+                }
+                console.log('Would be redirected to');
+
+                <?php if(is_admin_bar_showing() === false): ?>
+                if ("<?php echo $atts['url']; ?>" == '') {
+                    window.location.reload();
+                } else {
                     window.location.href = "<?php echo $atts['url']; ?>";
                 }
+                <?php else: ?>
+                    console.log('Countdown Plugin: admin bar is showing, redirecting is disabled');
+                    alert('Countdown Plugin: admin bar is showing, redirecting is disabled');
+                <?php endif; ?>
             }
 
             let days = Math.floor(diff / (1000*60*60*24));
             let hours = Math.floor(diff % (1000*60*60*24) / (1000*60*60));
             let minutes = Math.floor(diff % (1000*60*60)/ (1000*60));
             let seconds = Math.floor(diff % (1000*60) / 1000);
+
+            if (days < 0) days = 0;
+            if (hours < 0) hours = 0;
+            if (minutes < 0) minutes = 0;
+            if (seconds < 0) seconds = 0;
 
             //days <= 99 ? days = `0${days}` : days;
             //days <= 9 ? days = `00${days}` : days;
@@ -87,8 +107,12 @@ function countdown_timer_shortcode( $atts ) {
             document.querySelector(countdown_timer_container_selector + ' .seconds .counter').textContent = seconds;
 
         }
-        countdown_timer_callback();
-        setInterval(countdown_timer_callback,1000);
+
+        <?php if(is_admin_bar_showing()): ?>
+            countdown_timer_callback();
+        <?php else: ?>
+            window.countdown_timer_interval_id = setInterval(countdown_timer_callback,1000);
+        <?php endif; ?>
     </script>
 
     <?php
