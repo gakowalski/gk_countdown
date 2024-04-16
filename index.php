@@ -4,7 +4,7 @@
 Plugin Name: Countdown Timer
 Plugin URI:  
 Description: Countdown Timer
-Version:     1.0.2
+Version:     1.0.3
 Author:      Grzegorz Kowalski
 Author URI:  https://grzegorzkowalski.pl
 */
@@ -18,6 +18,7 @@ function countdown_timer_shortcode( $atts ) {
         'date' => date('Y-12-31 23:59:59'),
         'url' => '',
         'separator' => ':',
+        'redirect' => 'true',
     ), $atts, 'countdown_timer' );
 
     $date = $atts['date'];
@@ -70,15 +71,19 @@ function countdown_timer_shortcode( $atts ) {
                 }
                 console.log('Would be redirected to: <?php echo $atts['url']; ?>');
 
-                <?php if(is_admin_bar_showing() === false && is_customize_preview() == false): ?>
+                <?php if($atts['redirect'] == 'true' && is_admin_bar_showing() === false && is_customize_preview() == false): ?>
                 if ("<?php echo $atts['url']; ?>" == '') {
                     window.location.reload();
                 } else {
                     window.location.href = "<?php echo $atts['url']; ?>";
                 }
                 <?php else: ?>
-                    console.log('Countdown Plugin: redirecting is disabled for logged in admins');
-                    alert('Countdown Plugin: redirecting is disabled  for logged in admins');
+                    <?php if ($atts['redirect'] == 'false'): ?>
+                    console.log('Countdown Plugin: redirecting is disabled');
+                    <?php else: ?>
+                    console.log('Countdown Plugin: redirecting is disabled for logged-in admin users');
+                    alert('Countdown Plugin: redirecting is disabled  for logged-in admin users');
+                    <?php endif; ?>
                 <?php endif; ?>
             }
 
